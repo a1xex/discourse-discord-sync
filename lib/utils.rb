@@ -48,29 +48,29 @@ class Util
       member = server.member(discord_id)
       next if member.nil?
 
-      member_role_names = member.roles.map(&:name)
+      member_role_ids = member.roles.map { |r| r.id.to_s }
 
-      mapping.each do |role_name, group_name|
+      mapping.each do |role_id, group_name|
         group = Group.find_by(name: group_name)
         next if group.nil?
 
         discourse_user = User.find_by(id: user.id)
         next if discourse_user.nil?
 
-        has_discord_role = member_role_names.include?(role_name)
+        has_discord_role = member_role_ids.include?(role_id)
         in_discourse_group = GroupUser.exists?(group_id: group.id, user_id: discourse_user.id)
 
         if has_discord_role && !in_discourse_group
           group.add(discourse_user)
           Instance::bot.send_message(
             SiteSetting.discord_sync_admin_channel_id,
-            "Added @#{discourse_user.username} to Discourse group #{group_name} via Discord role #{role_name}"
+            "Added @#{discourse_user.username} to Discourse group #{group_name} via Discord role ID #{role_id}"
           )
         elsif !has_discord_role && in_discourse_group
           group.remove(discourse_user)
           Instance::bot.send_message(
             SiteSetting.discord_sync_admin_channel_id,
-            "Removed @#{discourse_user.username} from Discourse group #{group_name} via Discord role #{role_name}"
+            "Removed @#{discourse_user.username} from Discourse group #{group_name} via Discord role ID #{role_id}"
           )
         end
       end
