@@ -11,13 +11,6 @@ plugins:
   discord_sync_admin_channel_id:
     default: ''
     client: false
-  discord_sync_username:
-    default: true
-    client: false
-  discord_sync_verified_role:
+  discord_sync_role_group_map:
     default: ''
     client: false
-  discord_sync_safe_roles:
-    default: 'Admins|Moderators'
-    type: list
-    list_type: compact
