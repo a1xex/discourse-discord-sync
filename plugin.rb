@@ -1,8 +1,8 @@
 enabled_site_setting :discord_sync_enabled
 
 after_initialize do
-  require_relative '../plugins/discourse-discord-sync/lib/bot'
-  require_relative '../plugins/discourse-discord-sync/lib/utils'
+  require "#{__dir__}/lib/bot"
+  require "#{__dir__}/lib/utils"
 
   bot_thread = Thread.new do
     begin
