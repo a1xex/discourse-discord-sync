@@ -1,47 +1,37 @@
-gem 'rbnacl', '7.1.2'
-gem 'event_emitter', '0.2.6'
-gem 'websocket', '1.2.8'
-gem 'websocket-client-simple', '0.3.0'
-gem 'opus-ruby', '1.0.1', { require: false }
-gem 'netrc', '0.11.0'
-gem 'mime-types-data', '3.2019.1009'
-gem 'mime-types', '3.3.1'
-gem 'domain_name', '0.5.20180417'
-gem 'http-cookie','1.0.3'
-gem 'http-accept', '1.7.0', { require: false }
-gem 'rest-client', '2.1.0.rc1'
-gem 'discordrb-webhooks', '3.3.0', {require: false}
-gem 'discordrb', '3.3.0'
+gem 'discordrb', '3.4.2'
 
 enabled_site_setting :discord_sync_enabled
 
 after_initialize do
-  require_dependency File.expand_path('../lib/bot.rb', __FILE__)
-  require_dependency File.expand_path('../lib/utils.rb', __FILE__)
+  require_relative '../plugins/discourse-discord-sync/lib/bot'
+  require_relative '../plugins/discourse-discord-sync/lib/utils'
 
   bot_thread = Thread.new do
     begin
       Bot.run_bot
-    rescue Exception => ex
-      Rails.logger.error("Discord Bot: There was a problem: #{ex}")
+    rescue => ex
+      Rails.logger.error("Discord Bot error: #{ex.message}")
+      Rails.logger.error(ex.backtrace.join("\n"))
     end
   end
 
-  User.class_eval do
-    after_save do |user|
-      if user.id > 0 then Util.sync_user(user) end
+  bot_thread.abort_on_exception = false
+
+  on(:user_saved) do |user|
+    Util.sync_user(user) if user.id > 0
+  end
+
+  on(:user_added_to_group) do |user, group, automatic|
+    Util.sync_user(user) if user.id > 0
+  end
+
+  on(:user_removed_from_group) do |user, group|
+    Util.sync_user(user) if user.id > 0
+  end
+
+  on(:after_auth) do |authenticator, auth_result|
+    if authenticator.name == "discord" && auth_result.user&.id.to_i > 0
+      Util.sync_user(auth_result.user)
     end
-  end
-
-  DiscourseEvent.on(:user_added_to_group) do |user, group, automatic|
-    if user.id > 0 then Util.sync_user(user) end
-  end
-
-  DiscourseEvent.on(:user_removed_from_group) do |user, group|
-    if user.id > 0 then Util.sync_user(user) end
-  end
-
-  DiscourseEvent.on(:after_auth) do |authenticator, auth_result|
-    if authenticator.name == "discord" && auth_result.user.id > 0 then Util.sync_user(auth_result.user) end
   end
 end
