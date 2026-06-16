@@ -1,4 +1,4 @@
-gem 'discordrb', '3.4.2'
+gem 'discordrb', '3.4.0'
 
 enabled_site_setting :discord_sync_enabled
 
