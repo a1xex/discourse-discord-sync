@@ -2,6 +2,7 @@
 # about: Syncs Discord roles to Discourse groups
 # version: 2.0
 
+gem 'event_emitter', '0.2.6'
 gem 'websocket', '1.2.11'
 gem 'websocket-client-simple', '0.6.1'
 
