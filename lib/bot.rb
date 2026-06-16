@@ -78,7 +78,7 @@ module Bot
       op: 2,
       d: {
         token: SiteSetting.discord_sync_token,
-        intents: 269,
+        intents: 32767,
         properties: {
           os: "linux",
           browser: "discourse-discord-sync",
