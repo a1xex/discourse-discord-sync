@@ -4,21 +4,28 @@ require 'json'
 module Bot
   GATEWAY_URL = "wss://gateway.discord.gg/?v=10&encoding=json"
 
-  def self.run_bot
-    require 'websocket-client-simple' rescue nil
+  def self.log_error(msg)
+    File.open("/var/www/discourse/log/discord_bot.log", "a") do |f|
+      f.puts "[#{Time.now}] #{msg}"
+    end
+  end
 
+  def self.run_bot
+    log_error("Bot starting...")
+    require 'websocket-client-simple'
+    log_error("websocket-client-simple loaded")
     loop do
       begin
         connect
       rescue => ex
-        Rails.logger.error("Discord Bot crashed: #{ex.message}, restarting in 10s")
+        log_error("Bot crashed: #{ex.message}\n#{ex.backtrace.join("\n")}")
         sleep 10
       end
     end
   end
 
   def self.connect
-    require 'websocket/client/simple'
+    log_error("Connecting to Discord gateway...")
 
     @heartbeat_interval = nil
     @heartbeat_thread   = nil
@@ -32,16 +39,16 @@ module Bot
         payload = JSON.parse(msg.data)
         Bot.handle(payload, ws)
       rescue => ex
-        Rails.logger.error("Discord WS message error: #{ex.message}")
+        Bot.log_error("Message error: #{ex.message}")
       end
     end
 
     ws.on :close do |e|
-      Rails.logger.warn("Discord WS closed: #{e}")
+      Bot.log_error("WS closed: #{e}")
     end
 
     ws.on :error do |e|
-      Rails.logger.error("Discord WS error: #{e}")
+      Bot.log_error("WS error: #{e}")
     end
 
     sleep
@@ -58,16 +65,15 @@ module Bot
       @heartbeat_interval = data["heartbeat_interval"]
       start_heartbeat(ws)
       identify(ws) unless @identified
-
     when 11
-      Rails.logger.debug("Discord heartbeat ACK")
-
+      log_error("Heartbeat ACK")
     when 0
       handle_event(t, data)
     end
   end
 
   def self.identify(ws)
+    log_error("Identifying with Discord...")
     ws.send({
       op: 2,
       d: {
@@ -94,6 +100,7 @@ module Bot
   end
 
   def self.handle_event(type, data)
+    log_error("Event: #{type}")
     case type
     when "GUILD_MEMBER_ADD", "GUILD_MEMBER_UPDATE"
       discord_id = data.dig("user", "id")
