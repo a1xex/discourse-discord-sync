@@ -1,21 +1,25 @@
 require 'discordrb'
 
-# Handler to detect new members in a server
-module NewMember
+module RoleSync
   extend Discordrb::EventContainer
 
-  # Sync users when a new user joins the server
   member_join do |event|
+    Util.sync_from_discord(event.user.id)
+  end
+
+  member_update do |event|
     Util.sync_from_discord(event.user.id)
   end
 end
 
-# Container for the initialized bot
 module Instance
   @@bot = nil
 
   def self.init
-    @@bot = Discordrb::Commands::CommandBot.new token: SiteSetting.discord_sync_token, prefix: SiteSetting.discord_sync_prefix
+    @@bot = Discordrb::Commands::CommandBot.new(
+      token: SiteSetting.discord_sync_token,
+      prefix: SiteSetting.discord_sync_prefix
+    )
     @@bot
   end
 
@@ -24,23 +28,28 @@ module Instance
   end
 end
 
-# Main bot class
 class Bot
   def self.run_bot
     bot = Instance::init
 
     unless bot.nil?
-      # Register the new member handler
-      bot.include! NewMember
+      bot.include! RoleSync
 
       bot.ready do |event|
         puts "Logged in as #{bot.profile.username} (ID:#{bot.profile.id}) | #{bot.servers.size} servers"
-        Instance::bot.send_message(SiteSetting.discord_sync_admin_channel_id, "Discourse/Discord Bot Sync started!")
+        Instance::bot.send_message(
+          SiteSetting.discord_sync_admin_channel_id,
+          "Discord to Discourse role sync bot started!"
+        )
       end
 
-      # Add a simple command to confirm everything works properly
       bot.command(:ping) do |event|
         event.respond 'Pong!'
+      end
+
+      bot.command(:syncme) do |event|
+        Util.sync_from_discord(event.user.id)
+        event.respond "Syncing your roles now..."
       end
 
       bot.run
