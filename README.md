@@ -60,6 +60,12 @@ To get a role ID, enable Developer Mode in Discord (User Settings â†’ Advanced â
 
 ---
 
+## Support & Updates
+
+This plugin is provided as-is. No updates or feature additions are planned unless something is critically broken. If you need changes or new features, feel free to fork the repository and modify it yourself.
+
+---
+
 ## Credits
 
 Originally created by [Diego Barreiro (barreeeiroo)](https://github.com/barreeeiroo/discourse-discord-sync). The original plugin synced Discourse groups to Discord roles. This fork reverses that flow and modernizes the codebase for Ruby 3.x and current Discourse versions.
