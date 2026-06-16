@@ -37,3 +37,29 @@ When a user is given a role in Discord, they are automatically added to the corr
 ## Role Mapping
 
 Mappings are set in `discord_sync_role_group_map` using the following format:
+
+```
+ROLE_ID:group_name|ROLE_ID:group_name
+```
+
+**Example:**
+```
+1234567890123456789:staff|9876543210987654321:moderators
+```
+
+To get a role ID, enable Developer Mode in Discord (User Settings → Advanced → Developer Mode), then right-click any role and select **Copy Role ID**.
+
+---
+
+## How It Works
+
+1. User links their Discord account via Discord OAuth2 on Discourse.
+2. When their roles change in Discord, the bot receives a `GUILD_MEMBER_UPDATE` event.
+3. The bot compares their Discord roles against the configured mappings.
+4. The user is added to or removed from the corresponding Discourse groups automatically.
+
+---
+
+## License
+
+MIT
