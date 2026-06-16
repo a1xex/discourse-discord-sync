@@ -1,29 +1,39 @@
-# Discord Sync
+# discourse-discord-sync
 
-A Discourse plugin that runs a Discord bot to keep things synced between a Discourse forum and a Discord server.
+A Discourse plugin that syncs Discord roles to Discourse groups in real time using a Discord bot and Discord OAuth2.
 
-This plugin depends on Discord OAuth2 to identify and link Discourse-Discord accounts. If you don't want to allow
-users to login with Discord, but you wish to keep linking account, check
-[the solution to this topic](https://meta.discourse.org/t/partially-enable-login-option/175330/4?u=barreeeiroo).
+When a user is given a role in Discord, they are automatically added to the corresponding Discourse group — and removed when the role is taken away.
 
-This bot will sync all public Discourse groups with Discord roles. It will automatically trigger an update when an user
-links their Discord account, user groups are changed or profile gets updated.
+---
 
-## Installation Instructions
+## Requirements
 
-1. Follow the standard guide at [How to install a plugin?](https://meta.discourse.org/t/install-a-plugin/19157?u=barreeeiroo)
-with this repository URL.
-2. Follow [this guide](https://meta.discourse.org/t/configuring-discord-login-for-discourse/127129) to set up Login with Discord
-in your Discourse instance.
-3. In the Discord Developer portal, go to Bot, and add it to your server. Make sure you grant him the highest possible role.
-4. In Discourse, in Plugin Settings, set `discord sync token` with the Bot token that appears in the previous step.
+- Discord OAuth2 must be configured on your Discourse instance so accounts can be linked. If you want account linking without allowing Discord login, see [this solution](https://meta.discourse.org/t/partially-enable-login-option/175330/4?u=barreeeiroo).
+- Your bot must have the **Server Members Intent** enabled in the Discord Developer Portal.
+
+---
+
+## Installation
+
+1. Follow the standard [plugin installation guide](https://meta.discourse.org/t/install-a-plugin/19157) using this repository URL.
+2. Set up [Login with Discord](https://meta.discourse.org/t/configuring-discord-login-for-discourse/127129) on your Discourse instance.
+3. In the [Discord Developer Portal](https://discord.com/developers/applications), go to your app → **Bot** and enable all **Privileged Gateway Intents**.
+4. Invite the bot to your server with **Administrator** permissions and make sure its role is positioned above any roles it needs to manage.
+5. Configure the plugin settings in Discourse Admin → Settings → Plugins.
+
+---
 
 ## Configuration
 
-- **`discord sync enabled`**: Whether or not to enable the integration
-- **`discord sync token`**: Bot token from Discord
-- **`discord sync prefix`**: Prefix for commands (just `!ping` by now)
-- **`discord sync admin channel id`**: Channel to post logging messages (nick changes, role changes)
-- **`discord sync username`**: If true, it will sync all Discord server nicknames to their Discourse username
-- **`discord sync verified role`**: Role to add to all users who have a Discourse account
-- **`discord sync safe roles`**: List of roles that bot will ignore and will mark as manually granted in Discord
+| Setting | Description |
+|---|---|
+| `discord_sync_enabled` | Enable or disable the integration |
+| `discord_sync_token` | Bot token from the Discord Developer Portal |
+| `discord_sync_admin_channel_id` | Channel ID where the bot posts sync log messages |
+| `discord_sync_role_group_map` | Pipe-separated list of `role_id:group_name` mappings |
+
+---
+
+## Role Mapping
+
+Mappings are set in `discord_sync_role_group_map` using the following format:
