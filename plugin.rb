@@ -1,5 +1,3 @@
-gem 'discordrb', '3.4.0'
-
 enabled_site_setting :discord_sync_enabled
 
 after_initialize do
@@ -16,10 +14,6 @@ after_initialize do
   end
 
   bot_thread.abort_on_exception = false
-
-  on(:user_saved) do |user|
-    Util.sync_user(user) if user.id > 0
-  end
 
   on(:user_added_to_group) do |user, group, automatic|
     Util.sync_user(user) if user.id > 0
