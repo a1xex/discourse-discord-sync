@@ -1,3 +1,9 @@
+# name: discourse-discord-sync
+# about: Syncs Discord roles to Discourse groups
+# version: 2.0
+
+gem 'websocket-client-simple', '0.6.1'
+
 enabled_site_setting :discord_sync_enabled
 
 after_initialize do
